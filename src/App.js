@@ -7,13 +7,33 @@ class App extends React.Component {
     super(props)
 
     this.state = {
-      translated: ''
+      translated: '',
+      text: '',
+      typingTimeout: 0
     }
-    this.onKeyUp = this.onKeyUp.bind(this)
+    this.getInputText = this.getInputText.bind(this)
+    this.translate = this.translate.bind(this)
   }
 
-  onKeyUp(event){
-    this.setState({translated: translate(event.target.value)})
+  translate(text){
+    this.setState({translated: translate(text), typing: false})
+  }
+
+  getInputText(event){
+    const self = this;
+
+    if (self.state.typingTimeout) {
+       clearTimeout(self.state.typingTimeout);
+    }
+
+
+    this.setState({
+      text: event.target.value,
+      typing: true,
+      typingTimeout: setTimeout(function () {
+        self.translate(self.state.text);
+      }, 500)
+    })
   }
 
   render(){
@@ -22,9 +42,10 @@ class App extends React.Component {
         <header className="App-header">
           <label>Morse Translator</label>
           <div>
-            <input className="form-control" type="text" placeholder="Search" onKeyUp={this.onKeyUp} aria-label="Search" />
+            <input className="form-control" type="text" placeholder="Search" onChange={this.getInputText} aria-label="Search" />
           </div>
-          <label>{this.state.translated}</label>
+          {this.state.typing && <label>Typing...</label>}
+          <label>{!this.state.typing && this.state.translated}</label>
         </header>
       </div>
     );
